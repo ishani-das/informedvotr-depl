@@ -45,12 +45,14 @@ class App extends React.Component {
     return {
       "WA": { fill: "navy", }, "OR": { fill: "navy", }, "CA": { fill: "navy", }, "CO": { fill: "navy", }, "NM": { fill: "navy", }, "MN": { fill: "navy", },
       "IL": { fill: "navy", }, "VA": { fill: "navy", }, "NY": { fill: "navy", }, "ME": { fill: "navy", }, "VT": { fill: "navy", }, "NH": { fill: "navy", },
-      "MA": { fill: "navy", }, "RI": { fill: "navy", }, "CT": { fill: "navy", }, "NJ": { fill: "navy", }, "DE": { fill: "navy", }, "MD": { fill: "navy", }, "DC": { fill: "navy", },
+      "MA": { fill: "navy", }, "RI": { fill: "navy", }, "CT": { fill: "navy", }, "NJ": { fill: "navy", }, "DE": { fill: "navy", }, "MD": { fill: "navy", }, 
+      "DC": { fill: "navy", }, "HI": { fill: "navy", },
 
       "ID": { fill: "red", }, "MT": { fill: "red", }, "WY": { fill: "red", }, "UT": { fill: "red", }, "ND": { fill: "red", }, "SD": { fill: "red", },
-      "NE": { fill: "red", }, "KS": { fill: "red", }, "IA": { fill: "red", }, "MO": { fill: "red", }, "OK": { fill: "red", }, "MO": { fill: "red", },
+      "NE": { fill: "red", }, "KS": { fill: "red", }, "IA": { fill: "red", }, "OK": { fill: "red", }, "MO": { fill: "red", },
       "AR": { fill: "red", }, "TX": { fill: "red", }, "LA": { fill: "red", }, "MS": { fill: "red", }, "AL": { fill: "red", }, "GA": { fill: "red", },
-      "TN": { fill: "red", }, "SC": { fill: "red", }, "FL": { fill: "red", }, "NC": { fill: "red", }, "KY": { fill: "red", }, "WV": { fill: "red", }, "IN": { fill: "red", }, "OH": { fill: "red", },
+      "TN": { fill: "red", }, "SC": { fill: "red", }, "FL": { fill: "red", }, "NC": { fill: "red", }, "KY": { fill: "red", }, "WV": { fill: "red", }, 
+      "IN": { fill: "red", }, "OH": { fill: "red", }, "AK": { fill: "red", },
     }
   }
 
@@ -75,7 +77,7 @@ const HomePage = ({ HomePageCustomConfig }) => {
     status: 'initial',
   });
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setData((current) => ({ ...current, status: 'loading' }));
     try {
@@ -86,6 +88,25 @@ const HomePage = ({ HomePageCustomConfig }) => {
     } catch (error) {
       setData((current) => ({ ...current, status: 'failure' }));
     }
+
+    // try {
+    //   const response = await fetch('http://127.0.0.1:5000/subscribe', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ email: data.email }),
+    //   });
+  
+    //   if (response.ok) {
+    //     setData({ email: '', status: 'sent' });
+    //   } else {
+    //     const errorData = await response.json();
+    //     setData({ email: '', status: 'failure', error: errorData.error });
+    //   }
+    // } catch (error) {
+    //   setData({ email: '', status: 'failure', error: 'Network error' });
+    // }
   };
   // --------------------------------------------
 
@@ -99,7 +120,8 @@ const HomePage = ({ HomePageCustomConfig }) => {
   }
 
   return (
-    <div>
+    <div style={{ paddingLeft: '20px', paddingRight: '20px' }}>
+      <br />
       <h1>welcome! click on any state to get started.</h1>
 
       <form onSubmit={handleSubmit} id="demo">
@@ -113,7 +135,7 @@ const HomePage = ({ HomePageCustomConfig }) => {
         </FormLabel>
         <Input
           sx={{ '--Input-decoratorChildHeight': '45px' }}
-          placeholder="imavoter@gmail.com"
+          placeholder="imavoter@gmail.com  -  CA, US"
           type="email"
           required
           value={data.email}
@@ -145,7 +167,7 @@ const HomePage = ({ HomePageCustomConfig }) => {
           <FormHelperText
             sx={(theme) => ({ color: theme.vars.palette.primary[400] })}
           >
-            You're all set! Check your mailbox for an email from us.
+            You're all set! Expect an email from us shortly.
           </FormHelperText>
         )}
       </FormControl>

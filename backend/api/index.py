@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_mail import Mail, Message
 from transformers import pipeline
  # ---------------------------
 # from transformers import LongT5ForConditionalGeneration, LongT5Tokenizer, pipeline
@@ -14,6 +15,16 @@ from transformers import pipeline
 
 app = Flask(__name__)
 CORS(app)  # This allows all origins by default
+
+# Configure email settings
+app.config['MAIL_SERVER'] = 'smtp.gamil.com'  # Replace with your mail server
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'informedvotr@gmail.com'  # Replace with your email
+app.config['MAIL_PASSWORD'] = 'Ishani!20364'  # Replace with your email password
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
 
 summarizer = pipeline("summarization")
 #summarizer = pipeline("summarization", model=model, tokenizer=tokenizer)
@@ -43,6 +54,26 @@ def summarize():
 
     return jsonify(summary)
     # return jsonify({'summary': summary[0]['summary_text']})
+
+@app.route('/subscribe', methods=['POST'])
+def subscribe():
+    data = request.get_json()
+    email = data.get('email')
+    print(email)
+    if email:
+        msg = Message('Newsletter Subscription', sender='informedvotr@gmail.com', recipients=[email])
+        msg.body = 'Thank you for subscribing to our newsletter!'
+        print(msg.body)
+        try:
+            print("trying")
+            mail.send(msg)
+            print("done!")
+            return jsonify({'status': 'sent'}), 200
+        except Exception as e:
+            app.logger.error(f"Failed to send email: {e}")
+            return jsonify({'status': 'failure', 'error': str(e)}), 500
+    return jsonify({'status': 'failure', 'error': 'Invalid email'}), 400
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

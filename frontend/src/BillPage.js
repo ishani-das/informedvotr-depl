@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Typography, Container, CircularProgress, Button, Card, CardMedia, CardContent, Grid, CardActionArea, Box } from '@mui/material';
+import { styled } from "@mui/material/styles";
+import MuiButton from "@mui/material/Button";
+import { Typography, Container, CircularProgress, /*Button, */Card, CardMedia, CardContent, Grid, CardActionArea, Box } from '@mui/material';
 import HtmlContent from './HtmlContent';
 import { htmlToText } from 'html-to-text';
 import { fetchSearchResults } from './googleSearchService';
 
+export const Button = styled(MuiButton)(({ pill }) => ({
+  borderRadius: pill ? 50 : 4,
+  // background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)', 
+  background: 'linear-gradient(45deg, #0ea2e6 30%, #bd4242 90%)',
+  color: 'white', 
+  // '&:hover': {
+  //   background: 'linear-gradient(45deg, #3470ad 30%, #0ea2e6 90%)', 
+  // },
+}));
 
 const BillPage = () => {
   const { billId } = useParams();
@@ -103,6 +114,8 @@ const BillPage = () => {
 
   return (
     <Container>
+      <br />
+      <br />
       <Typography variant="h4" gutterBottom style={{ fontWeight: 'bold' }}>
         {billDetails.bill_number} - <a href={billDetails.url} target="_blank" rel="noopener noreferrer">
           {billDetails.title}
@@ -111,12 +124,23 @@ const BillPage = () => {
       <Typography variant="h6" paragraph style={{ fontStyle: 'italic' }}>
         {billDetails.description}
       </Typography>
-
+      <br />
+      <Typography variant="h5" gutterBottom align="center" style={{ fontWeight: 'bold' }}>
+          Confused?
+      </Typography>
+      <br />
       {billTextInHTML && (
         <div>
           <Grid container justifyContent="center" mb={2}>
-            <Button size = "large" variant="text" color="primary" onClick={summarizeText}>
-              Confused? Let us summarize it for you!
+            <Button variant="outlined" pill size="large" onClick={summarizeText}
+            sx={{
+              padding: '12px 24px',  // Adjust padding as needed
+              fontSize: '1.2rem',    // Adjust font size as needed
+              fontWeight: 'bold',    // Make the text bold
+            }}
+            >
+            {/* <Button size = "large" variant="text" color="primary" onClick={summarizeText}> */}
+              Let us summarize it for you! ✨
             </Button>
           </Grid>
           {summaryLoading && <Box
@@ -128,8 +152,9 @@ const BillPage = () => {
             <CircularProgress />
           </Box>}
           {/* <HtmlContent html={billTextInHTML}/> */}
+         
           {summary && (
-            <Typography variant="p" color="textSecondary">
+             <Typography sx={{ fontSize: '18px' }} color="textSecondary">
               {/* <h2>Summary</h2> */}
               <p>{summary}</p>
             </Typography>
@@ -137,7 +162,9 @@ const BillPage = () => {
         </div>
 
       )}
-
+      <br />
+      <br />
+      <br />
       <Typography variant="h5" gutterBottom align="center" style={{ fontWeight: 'bold' }}>
         Related Content in the Media
       </Typography>

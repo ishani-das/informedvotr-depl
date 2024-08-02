@@ -60,6 +60,7 @@ const StatePage = () => {
 
   return (
     <div>
+      <br />
       <h1>Recent {stateCode} Bills</h1>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
         {posts.slice(0,visibleCards).map(post => (

@@ -78,16 +78,42 @@ const HomePage = ({ HomePageCustomConfig }) => {
   });
 
   const handleSubmit = async (event) => {
+    // console.log(event);
     event.preventDefault();
-    setData((current) => ({ ...current, status: 'loading' }));
+    // setData((current) => ({ ...current, status: 'loading' }));
+    // try {
+    //   // Replace timeout with real backend operation
+    //   setTimeout(() => {
+    //     setData({ email: '', status: 'sent' });
+    //   }, 1500);
+    // } catch (error) {
+    //   setData((current) => ({ ...current, status: 'failure' }));
+    // }
+
+    // Update the status to loading
+    setData((prevData) => ({ ...prevData, status: 'loading' }));
+
     try {
-      // Replace timeout with real backend operation
-      setTimeout(() => {
-        setData({ email: '', status: 'sent' });
-      }, 1500);
+      // Send email to the backend
+      const response = await fetch('http://localhost:5000/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      });
+
+      if (response.ok) {
+        // Update status on success
+        setData((prevData) => ({ ...prevData, status: 'sent' }));
+      } else {
+        // Handle failure case
+        setData((prevData) => ({ ...prevData, status: 'failure' }));
+      }
     } catch (error) {
-      setData((current) => ({ ...current, status: 'failure' }));
+      // Handle network errors or unexpected issues
+      setData((prevData) => ({ ...prevData, status: 'failure' }));
     }
+
+
 
     // try {
     //   const response = await fetch('http://127.0.0.1:5000/subscribe', {
@@ -159,7 +185,7 @@ const HomePage = ({ HomePageCustomConfig }) => {
           <FormHelperText
             sx={(theme) => ({ color: theme.vars.palette.danger[400] })}
           >
-            Oops! something went wrong, please try again later.
+            Oops! Either you are already on the list or something went wrong. If the latter, please try again later.
           </FormHelperText>
         )}
 

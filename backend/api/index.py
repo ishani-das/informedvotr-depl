@@ -2,43 +2,67 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_mail import Mail, Message
 from transformers import pipeline
- # ---------------------------
-# from transformers import LongT5ForConditionalGeneration, LongT5Tokenizer, pipeline
-# from transformers import PegasusForConditionalGeneration, PegasusTokenizer, pipeline
 
-# Initialize the Pegasus model and tokenizer
-#model_name = "google/pegasus-large"
-#tokenizer = PegasusTokenizer.from_pretrained(model_name)
-#model = PegasusForConditionalGeneration.from_pretrained(model_name)
-# -------------------------------
+from mailjet_rest import Client
+import os
+
+from groq import Groq
 
 
 app = Flask(__name__)
 CORS(app)  # This allows all origins by default
 
-# Configure email settings
-app.config['MAIL_SERVER'] = 'smtp.gamil.com'  # Replace with your mail server
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'informedvotr@gmail.com'  # Replace with your email
-app.config['MAIL_PASSWORD'] = 'Ishani!20364'  # Replace with your email password
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-
-mail = Mail(app)
-
-summarizer = pipeline("summarization")
-#summarizer = pipeline("summarization", model=model, tokenizer=tokenizer)
-
-
 @app.route('/')
 def home():
-    return "Welcome to the Text Summarization API"
+    return "Welcome to the InformedVotr backend."
+
+# ---------------------------- SUMMARIZATION W GROQ (new) ----------------------------
+client = Groq(
+    api_key=os.environ.get("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"),
+)
+
+@app.route('/summarize_groq', methods=['POST'])
+def summarize_groq():
+
+    cutoff_phrase = "DIGEST KEY"
+    data = request.json
+    text = data.get('text', '')
+    # print("OG TEXT : ")
+    # print(text)
+    
+    # print('SHORTENED TEXT')
+    # print(text.split(cutoff_phrase)[0])
+    shortened_text = text.split(cutoff_phrase)[0]
+    my_prompt = "Please summarize this in 2 paragraphs: \n" + shortened_text
+    #print(my_prompt)
+
+    chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": my_prompt,
+        }
+    ],
+    model="llama-3.1-70b-versatile",
+)
+    summarized_text = chat_completion.choices[0].message.content
+    return jsonify({'summarized_text': summarized_text})
+# ------------------------------------------------------------------------------------
+
+
+
+
+# ---------------------------- SUMMARIZATION W HUGGINGFACE (old) ----------------------------
+summarizer = pipeline("summarization")
 
 @app.route('/summarize', methods=['POST'])
 def summarize():
     cutoff_phrase = "DIGEST KEY"
     data = request.json
     text = data.get('text', '')
+    print("OG TEXT : ")
+    print(text)
+    
     print('SHORTENED TEXT')
     print(text.split(cutoff_phrase)[0])
 
@@ -48,31 +72,68 @@ def summarize():
     # text = "The tiger (Panthera tigris) is a member of the genus Panthera and the largest living cat species native to Asia. It has a powerful, muscular body with a large head and paws, a long tail and orange fur with black, mostly vertical stripes. It is traditionally classified into nine recent subspecies, though some recognise only two subspecies, mainland Asian tigers and the island tigers of the Sunda Islands. Throughout the tiger's range, it inhabits mainly forests, from coniferous and temperate broadleaf and mixed forests in the Russian Far East and Northeast China to tropical and subtropical moist broadleaf forests on the Indian subcontinent and Southeast Asia. The tiger is an apex predator and preys mainly on ungulates, which it takes by ambush. It lives a mostly solitary life and occupies home ranges, which it defends from individuals of the same sex. The range of a male tiger overlaps with that of multiple females with whom he mates. Females give birth to usually two or three cubs that stay with their mother for about two years. When becoming independent, they leave their mother's home range and establish their own."
    
     summary = summarizer(text.split(cutoff_phrase)[0], max_length=300, min_length=25, do_sample=False)
-    # summary = summarizer(text, max_length=512, min_length=30, do_sample=False)
-    print("SUMMARY : ")
-    print(summary)
+    # print("SUMMARY : ")
+    # print(summary)
 
     return jsonify(summary)
-    # return jsonify({'summary': summary[0]['summary_text']})
+# ------------------------------------------------------------------------------------
+
+
+
+# --------------------------------------- MAILJET EMAIL LIST ---------------------------------------
+
+api_key = '33f7053ed3e293d92854787b8af95a77' # os.environ['MJ_APIKEY_PUBLIC']
+api_secret = '3a35e7c48c38608ba70f38af9fdf9998' # os.environ['MJ_APIKEY_PRIVATE']
+mailjet = Client(auth=(api_key, api_secret))
+list_id = '10460647'
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
+    print("inside subscribe...")
     data = request.get_json()
     email = data.get('email')
     print(email)
-    if email:
-        msg = Message('Newsletter Subscription', sender='informedvotr@gmail.com', recipients=[email])
-        msg.body = 'Thank you for subscribing to our newsletter!'
-        print(msg.body)
-        try:
-            print("trying")
-            mail.send(msg)
-            print("done!")
-            return jsonify({'status': 'sent'}), 200
-        except Exception as e:
-            app.logger.error(f"Failed to send email: {e}")
-            return jsonify({'status': 'failure', 'error': str(e)}), 500
-    return jsonify({'status': 'failure', 'error': 'Invalid email'}), 400
+
+    # --------------------------------------------------------------------
+    contact_data = {
+        'Email': email
+    }
+    result = mailjet.contact.create(data=contact_data)
+    # --------------------------------------------------------------------
+    # email_data = {
+    #     'Messages': [
+    #         {
+    #             "From": {
+    #                 "Email": "ishanidas05@gmail.com",
+    #                 "Name": "Me"
+    #             },
+    #             "To": [
+    #                 {
+    #                 "Email": email,
+    #                 "Name": "You"
+    #                 }
+    #             ],
+    #             "Subject": "You've joined the newsletter!",
+    #             "TextPart": "Greetings from InformedVotr!",
+    #             "HTMLPart": "<h3>Welcome!</h3><br />Be on the lookout for monthly newsletters about updates on new bills/laws pertaining to your state."
+    #         }
+    #     ]
+    # }
+    # result2 = mailjet.send.create(data=email_data)
+    # --------------------------------------------------------------------
+
+    # if result.status_code == 201 and result2.status_code == 201:
+    #     return jsonify({'message': f'Successfully added {email} to the list.'}), 201
+    # if result.status_code != 201:
+    #     return jsonify({'error': f'Failed to add {email}.', 'status': result.status_code, 'response': result.json()}), result.status_code
+    # if result2.status_code != 201:
+    #     return jsonify({'error': f'Failed to add {email}.', 'status': result2.status_code, 'response': result2.json()}), result2.status_code
+
+    if result.status_code == 201:
+        return jsonify({'message': f'Successfully added {email} to the list.'}), 201
+    else:
+        return jsonify({'error': f'Failed to add {email}.', 'status': result.status_code, 'response': result.json()}), result.status_code
+# -----------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':

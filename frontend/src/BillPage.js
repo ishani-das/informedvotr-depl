@@ -92,7 +92,8 @@ const BillPage = () => {
       console.log('PLAIN TEXT : ', plainText)
       // const response = await axios.post('http://127.0.0.1:5000/summarize', { text: plainText }); 
       // setSummary(response.data[0].summary_text);
-      const response = await axios.post('http://127.0.0.1:5000/summarize_groq', { text: plainText }); 
+      // const response = await axios.post('http://127.0.0.1:5000/summarize_groq', { text: plainText }); 
+      const response = await axios.post('https://iv-backend-new-37160a2e20fa.herokuapp.com/summarize_groq', { text: plainText }); 
       setSummary(response.data.summarized_text);
     } catch (error) {
       console.error('Error summarizing text:', error);

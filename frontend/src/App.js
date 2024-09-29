@@ -95,7 +95,9 @@ const HomePage = ({ HomePageCustomConfig }) => {
 
     try {
       // Send email to the backend
-      const response = await fetch('http://localhost:5000/subscribe', {
+      // https://iv-backend-new-37160a2e20fa.herokuapp.com/
+      // const response = await fetch('http://localhost:5000/subscribe', {
+      const response = await fetch('https://iv-backend-new-37160a2e20fa.herokuapp.com/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: data.email }),
